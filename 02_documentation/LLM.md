@@ -64,6 +64,7 @@ How to install:
     sudo apt install nvidia-cuda-toolkit -y
     ```
     ```bash
+    # GPU Check
     (vllm-env) muazzam@DESKTOP-FBB9PSC:~$ nvcc --version
                         nvcc: NVIDIA (R) Cuda compiler driver
                         Copyright (c) 2005-2023 NVIDIA Corporation
@@ -73,17 +74,19 @@ How to install:
     ```
     
     ```bash
+    # vLLM Main Server
     python -m vllm.entrypoints.openai.api_server \
-        --model TinyLlama/TinyLlama-1.1B-Chat-v1.0 \
-        --gpu-memory-utilization 0.75 \
-        --max-model-len 256 \
-        --enforce-eager
+    --model TinyLlama/TinyLlama-1.1B-Chat-v1.0 \
+    --host 0.0.0.0 \
+    --port 8000 \
+    --max-model-len 1024 \
+    --gpu-memory-utilization 0.6
     ```
+
     ```bash
     # Local IP
         hostname -I
-        # - muazzam@DESKTOP-FBB9PSC:/mnt/c/Users/Muazzam$ hostname -I
-                                192.168.37.145
+        # Result: 192.168.37.145
     # Open a new WSL Instance and use the same IP that you Found Above
         curl http://192.168.37.145:8000/v1/chat/completions   -H "Content-Type: application/json"   -d '{
             "model": "TinyLlama/TinyLlama-1.1B-Chat-v1.0",

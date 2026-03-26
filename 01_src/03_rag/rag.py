@@ -25,7 +25,7 @@ MODEL_NAME = "TinyLlama/TinyLlama-1.1B-Chat-v1.0"
 # ==============================
 # STEP 1: LOAD PDF
 # ==============================
-print("🔹 STEP 1: Loading PDF...")
+print("STEP 1: Loading PDF...")
 
 if not os.path.exists(PDF_PATH):
     raise FileNotFoundError(f"PDF not found at: {PDF_PATH}")
@@ -33,32 +33,32 @@ if not os.path.exists(PDF_PATH):
 loader = PyPDFLoader(PDF_PATH)
 docs = loader.load()
 
-print(f"✅ Loaded {len(docs)} pages")
+print(f" Loaded {len(docs)} pages")
 
 # ==============================
 # STEP 2: EMBEDDINGS
 # ==============================
-print("🔹 STEP 2: Loading embeddings model...")
+print("STEP 2: Loading embeddings model...")
 
 embedding = HuggingFaceEmbeddings(
     model_name="sentence-transformers/all-MiniLM-L6-v2"
 )
 
-print("✅ Embeddings ready")
+print(" Embeddings ready")
 
 # ==============================
 # STEP 3: VECTOR DB (PERSISTENT)
 # ==============================
-print("🔹 STEP 3: Initializing vector DB...")
+print("STEP 3: Initializing vector DB...")
 
 if os.path.exists(DB_DIR):
-    print("⚡ Loading existing DB...")
+    print(" Loading existing DB...")
     db = Chroma(
         persist_directory=DB_DIR,
         embedding_function=embedding
     )
 else:
-    print("⚡ Creating new DB (first run, may take time)...")
+    print(" Creating new DB (first run, may take time)...")
     db = Chroma.from_documents(
         docs,
         embedding,
@@ -66,21 +66,21 @@ else:
     )
     db.persist()
 
-print("✅ Vector DB ready")
+print(" Vector DB ready")
 
 # ==============================
 # STEP 4: USER INPUT LOOP
 # ==============================
-print("\n💬 RAG SYSTEM READY (type 'exit' to quit)\n")
+print("\nRAG SYSTEM READY (type 'exit' to quit)\n")
 
 client = create_client(LLM_URL)
 
 while True:
     try:
-        query = input("👉 Enter your question: ").strip()
+        query = input("Enter your question: ").strip()
 
         if query.lower() in ["exit", "quit"]:
-            print("👋 Exiting...")
+            print("Exiting...")
             break
 
         if not query:
@@ -89,7 +89,7 @@ while True:
         # ==============================
         # STEP 5: RETRIEVAL
         # ==============================
-        print("🔍 Searching relevant context...")
+        print("Searching relevant context...")
         results = db.similarity_search(query, k=2)
 
         context = "\n\n".join([doc.page_content for doc in results])
@@ -98,31 +98,31 @@ while True:
         # STEP 6: PROMPT
         # ==============================
         prompt = f"""
-You are an assistant that answers ONLY using the provided context.
+            You are an assistant that answers ONLY using the provided context.
 
-Context:
-{context}
+            Context:
+            {context}
 
-Question:
-{query}
-"""
+            Question:
+            {query}
+            """
 
         # ==============================
         # STEP 7: LLM CALL
         # ==============================
-        print("🤖 Asking LLM...")
+        print("Asking LLM...")
         answer = ask_llm(client, MODEL_NAME, prompt)
 
         # ==============================
         # OUTPUT
         # ==============================
-        print("\n✅ Answer:\n")
+        print("\n Answer:\n")
         print(answer)
         print("\n" + "="*50 + "\n")
 
     except KeyboardInterrupt:
-        print("\n👋 Interrupted. Exiting...")
+        print("\n Interrupted. Exiting...")
         break
 
     except Exception as e:
-        print(f"❌ Error: {e}")
+        print(f" Error: {e}")
