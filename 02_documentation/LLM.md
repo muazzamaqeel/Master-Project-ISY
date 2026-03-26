@@ -93,4 +93,4 @@ How to install:
         }'
     ```
 #### Results:
-![Result](/images/01_image.png)
+![Result](/images/02_image.png)
